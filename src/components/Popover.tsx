@@ -63,7 +63,7 @@ export function Dialog({
       role="presentation"
     >
       <div
-        className="w-[min(32.5rem,calc(100vw-2rem))] rounded-2xl bg-panel px-6 pt-[22px] pb-5 shadow-float"
+        className="w-[min(32.5rem,calc(100vw-2rem))] max-h-[min(40rem,calc(100dvh-2rem))] overflow-auto rounded-2xl bg-panel px-6 pt-[22px] pb-5 shadow-float max-md:px-4"
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"

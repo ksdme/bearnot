@@ -1,6 +1,7 @@
 import { FileTree, useFileTree } from '@pierre/trees/react'
 import { Search, SlidersHorizontal, SquarePen } from 'lucide-react'
-import { useEffect, useMemo, useRef, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, type CSSProperties, type MouseEvent } from 'react'
+import { cx } from '../lib/cx'
 import { noteTreePath, treePathToNotePath } from '../notes/paths'
 import { useNotes } from '../state/NotesProvider'
 
@@ -27,7 +28,13 @@ const TREE_STYLE = {
   '--trees-theme-scrollbar-thumb': 'var(--color-sidebar-scroll)',
 } as CSSProperties
 
-export function Sidebar() {
+export function Sidebar({
+  hiddenOnCompact,
+  onNoteOpen,
+}: {
+  hiddenOnCompact?: boolean
+  onNoteOpen?: () => void
+}) {
   const { notes, selectedPath, selectNote, createNote, setSettingsOpen } = useNotes()
 
   const paths = useMemo(
@@ -37,6 +44,13 @@ export function Sidebar() {
 
   const selectNoteRef = useRef(selectNote)
   selectNoteRef.current = selectNote
+  const onNoteOpenRef = useRef(onNoteOpen)
+  onNoteOpenRef.current = onNoteOpen
+
+  const openNote = (treePath: string) => {
+    selectNoteRef.current(treePathToNotePath(treePath))
+    onNoteOpenRef.current?.()
+  }
 
   const { model } = useFileTree({
     paths,
@@ -91,21 +105,43 @@ export function Sidebar() {
     return () => window.removeEventListener('keydown', onKey)
   }, [model])
 
+  const onTreeClick = (event: MouseEvent<HTMLElement>) => {
+    const row = event.nativeEvent.composedPath().find(
+      (node): node is HTMLElement => node instanceof HTMLElement && node.dataset.itemType === 'file',
+    )
+    const path = row?.dataset.itemPath
+    if (!path?.endsWith('.md')) return
+    openNote(path)
+  }
+
   return (
-    <aside className="flex min-h-0 min-w-0 select-none flex-col overflow-hidden rounded-xl bg-sidebar text-sidebar-fg">
-      <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5">
-        <div className="flex gap-[7px]" aria-hidden="true">
+    <aside
+      className={cx(
+        'flex min-h-0 min-w-0 select-none flex-col overflow-hidden rounded-xl bg-sidebar text-sidebar-fg',
+        'max-md:col-start-1 max-md:row-start-1 max-md:rounded-none max-md:pb-[env(safe-area-inset-bottom)]',
+        hiddenOnCompact && 'max-md:pointer-events-none max-md:invisible max-md:z-0',
+        !hiddenOnCompact && 'max-md:z-10',
+      )}
+      aria-hidden={hiddenOnCompact || undefined}
+      inert={hiddenOnCompact || undefined}
+    >
+      <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5 max-md:pt-[max(0.875rem,env(safe-area-inset-top))]">
+        <div className="hidden gap-[7px] md:flex" aria-hidden="true">
           <span className="block size-3 rounded-full bg-traffic-red" />
           <span className="block size-3 rounded-full bg-traffic-yellow" />
           <span className="block size-3 rounded-full bg-traffic-green" />
         </div>
+        <div className="text-[15px] font-bold text-sidebar-selected-fg md:hidden">Notes</div>
         <div className="flex items-center gap-0.5">
           <button
             type="button"
             className="icon-btn icon-btn-ghost"
             aria-label="New note"
             title="New note"
-            onClick={() => void createNote()}
+            onClick={() => {
+              void createNote()
+              onNoteOpen?.()
+            }}
           >
             <SquarePen size={15} />
           </button>
@@ -130,7 +166,12 @@ export function Sidebar() {
         </div>
       </div>
 
-      <FileTree model={model} className="flex min-h-0 w-full flex-1" style={TREE_STYLE} />
+      <FileTree
+        model={model}
+        className="flex min-h-0 w-full flex-1"
+        style={TREE_STYLE}
+        onClick={onTreeClick}
+      />
     </aside>
   )
 }

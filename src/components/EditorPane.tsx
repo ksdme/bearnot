@@ -3,6 +3,7 @@ import {
   Archive,
   Bold,
   CheckSquare,
+  ChevronLeft,
   Copy,
   Heading,
   Highlighter,
@@ -55,6 +56,20 @@ function IconButton({
   )
 }
 
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className="inline-flex h-8 items-center rounded-lg border-0 bg-transparent px-1.5 text-fg-dim hover:bg-black/6"
+      aria-label="Back to notes"
+      onClick={onClick}
+    >
+      <ChevronLeft size={18} />
+      <span className="pr-1 text-[13px] font-bold">Notes</span>
+    </button>
+  )
+}
+
 function wordStats(body: string) {
   const text = body.replace(/[#*_`>~\[\]()!|]/g, ' ').replace(/\s+/g, ' ').trim()
   return {
@@ -64,7 +79,13 @@ function wordStats(body: string) {
   }
 }
 
-export function EditorPane() {
+export function EditorPane({
+  hiddenOnCompact,
+  onBack,
+}: {
+  hiddenOnCompact?: boolean
+  onBack?: () => void
+}) {
   const {
     selectedNote,
     saveBody,
@@ -171,9 +192,21 @@ export function EditorPane() {
     setPromptValue('')
   }
 
+  const paneClass = cx(
+    'relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl bg-panel',
+    'max-md:col-start-1 max-md:row-start-1 max-md:rounded-none',
+    hiddenOnCompact && 'max-md:pointer-events-none max-md:invisible max-md:z-0',
+    !hiddenOnCompact && 'max-md:z-10',
+  )
+
   if (!selectedNote) {
     return (
-      <section className="relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl bg-panel">
+      <section className={paneClass} aria-hidden={hiddenOnCompact || undefined} inert={hiddenOnCompact || undefined}>
+        {onBack && (
+          <header className="flex h-14 shrink-0 items-center px-2 max-md:h-[calc(3.5rem+env(safe-area-inset-top))] max-md:pt-[env(safe-area-inset-top)]">
+            <BackButton onClick={onBack} />
+          </header>
+        )}
         <div className="grid h-full place-items-center p-12 text-center text-fg-muted">
           Select a note, or write a new one.
         </div>
@@ -185,9 +218,10 @@ export function EditorPane() {
   const inTrash = selectedNote.trashed
 
   return (
-    <section className="relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl bg-panel">
-      <header className="flex h-14 items-center justify-between px-4">
-        <div className="flex items-center gap-0.5 text-fg-dim">
+    <section className={paneClass} aria-hidden={hiddenOnCompact || undefined} inert={hiddenOnCompact || undefined}>
+      <header className="flex h-14 shrink-0 items-center justify-between px-2 md:px-4 max-md:h-[calc(3.5rem+env(safe-area-inset-top))] max-md:pt-[env(safe-area-inset-top)]">
+        <div className="flex min-w-0 items-center gap-0.5 text-fg-dim">
+          {onBack && <BackButton onClick={onBack} />}
           {editor && (
             <>
               <IconButton label="Undo" onClick={() => editor.chain().focus().undo().run()}>
@@ -362,7 +396,7 @@ export function EditorPane() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-auto px-0 pt-2 pb-24 [&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-panel [&::-webkit-scrollbar-thumb]:bg-border">
+      <div className="flex-1 overflow-auto overscroll-contain px-0 pt-2 pb-24 [&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-panel [&::-webkit-scrollbar-thumb]:bg-border">
         {isLocked ? (
           <div className="grid h-full place-items-center content-center justify-items-center gap-2.5 p-12 text-center text-fg-subtle">
             <Lock size={36} strokeWidth={1.4} />
@@ -380,7 +414,7 @@ export function EditorPane() {
       </div>
 
       {!isLocked && editor && (
-        <div className="absolute bottom-[22px] left-1/2 z-10 flex -translate-x-1/2 items-center gap-0.5 rounded-[14px] bg-toolbar px-2 py-1.5 text-fg-menu shadow-float">
+        <div className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-1/2 z-10 flex w-max max-w-[calc(100%-1.25rem)] -translate-x-1/2 items-center gap-0.5 overflow-x-auto overscroll-x-contain rounded-[14px] bg-toolbar px-2 py-1.5 text-fg-menu shadow-float [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="relative">
             <IconButton
               label="Headings"

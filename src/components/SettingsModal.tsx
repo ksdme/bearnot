@@ -15,10 +15,10 @@ export function SettingsModal() {
           Notes are plain Markdown files with YAML frontmatter. This session uses an in-memory
           file storage adapter — nothing is written to disk yet, and there is no account layer.
         </p>
-        <dl className="mb-4 grid grid-cols-3 gap-2.5">
+        <dl className="mb-4 grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-3">
           <div className="rounded-[10px] bg-surface px-3 py-2.5">
             <dt className="mb-1 text-[11px] text-fg-muted">Adapter</dt>
-            <dd className="m-0 text-[13px] font-bold">{storage.constructor.name}</dd>
+            <dd className="m-0 break-all text-[13px] font-bold">{storage.constructor.name}</dd>
           </div>
           <div className="rounded-[10px] bg-surface px-3 py-2.5">
             <dt className="mb-1 text-[11px] text-fg-muted">Folder</dt>
@@ -35,7 +35,7 @@ export function SettingsModal() {
               key={note.path}
               className="flex justify-between gap-3 border-b border-surface-muted px-3 py-2 text-[13px] last:border-b-0"
             >
-              <code className="font-mono text-xs text-fg-menu">{noteTreePath(note.path)}</code>
+              <code className="font-mono text-xs break-all text-fg-menu">{noteTreePath(note.path)}</code>
               <span className="overflow-hidden text-fg-muted text-ellipsis whitespace-nowrap">
                 {note.title}
               </span>
