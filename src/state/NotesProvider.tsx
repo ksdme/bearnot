@@ -12,29 +12,18 @@ import { MemoryFileStorage } from '../storage/memory'
 import type { FileStorageAdapter } from '../storage/types'
 import { createNote as createNoteFile, destroyNote, duplicateNote, listNotes, writeNote } from '../notes/service'
 import { seedIfEmpty } from '../notes/seed'
-import { buildTagTree, noteHasTag } from '../notes/tags'
-import { isSameLocalDay } from '../notes/time'
-import type { Note, Selection, SmartFolder, SortMode, TagNode } from '../notes/types'
+import type { Note } from '../notes/types'
 
 type FlagPatch = Partial<Pick<Note, 'pinned' | 'archived' | 'trashed' | 'locked'>>
 
 type NotesContextValue = {
   ready: boolean
   notes: Note[]
-  filteredNotes: Note[]
   selectedPath: string | null
   selectedNote: Note | null
-  selection: Selection
-  search: string
-  sort: SortMode
   unlocked: ReadonlySet<string>
   settingsOpen: boolean
-  tagTree: TagNode[]
-  headerTitle: string
   storage: FileStorageAdapter
-  setSelection: (selection: Selection) => void
-  setSearch: (value: string) => void
-  setSort: (sort: SortMode) => void
   selectNote: (path: string | null) => void
   createNote: () => Promise<Note | null>
   saveBody: (path: string, body: string) => Promise<void>
@@ -47,52 +36,9 @@ type NotesContextValue = {
 
 const NotesContext = createContext<NotesContextValue | null>(null)
 
-const FOLDER_TITLES: Record<SmartFolder, string> = {
-  notes: 'Notes',
-  untagged: 'Untagged',
-  todo: 'Todo',
-  today: 'Today',
-  locked: 'Locked',
-  archive: 'Archive',
-  trash: 'Trash',
-}
-
-function matchesSelection(note: Note, selection: Selection): boolean {
-  if (selection.type === 'folder') {
-    switch (selection.id) {
-      case 'notes':
-        return !note.archived && !note.trashed
-      case 'untagged':
-        return !note.archived && !note.trashed && note.tags.length === 0
-      case 'todo':
-        return !note.archived && !note.trashed && note.hasTodo
-      case 'today':
-        return (
-          !note.archived &&
-          !note.trashed &&
-          (isSameLocalDay(note.modified) || isSameLocalDay(note.created))
-        )
-      case 'locked':
-        return note.locked && !note.trashed
-      case 'archive':
-        return note.archived && !note.trashed
-      case 'trash':
-        return note.trashed
-    }
-  }
-  return !note.archived && !note.trashed && noteHasTag(note, selection.id)
-}
-
-function sortNotes(notes: Note[], sort: SortMode): Note[] {
-  const copy = [...notes]
-  copy.sort((a, b) => {
-    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1
-    if (sort === 'title') return a.title.localeCompare(b.title)
-    const left = sort === 'created' ? a.created : a.modified
-    const right = sort === 'created' ? b.created : b.modified
-    return right.localeCompare(left)
-  })
-  return copy
+function pickNeighbor(path: string, pool: Note[]): string | null {
+  const index = pool.findIndex((note) => note.path === path)
+  return pool[index + 1]?.path ?? pool[index - 1]?.path ?? null
 }
 
 export function NotesProvider({ children }: { children: ReactNode }) {
@@ -103,9 +49,6 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const [notes, setNotes] = useState<Note[]>([])
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
-  const [selection, setSelectionState] = useState<Selection>({ type: 'folder', id: 'notes' })
-  const [search, setSearch] = useState('')
-  const [sort, setSort] = useState<SortMode>('modified')
   const [unlocked, setUnlocked] = useState<Set<string>>(() => new Set())
   const [settingsOpen, setSettingsOpen] = useState(false)
 
@@ -120,11 +63,8 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       const loaded = await listNotes(storage)
       if (cancelled) return
       setNotes(loaded)
-      const initial = sortNotes(
-        loaded.filter((note) => matchesSelection(note, { type: 'folder', id: 'notes' })),
-        'modified',
-      )
-      setSelectedPath(initial[0]?.path ?? null)
+      const preferred = loaded.filter((note) => !note.trashed)
+      setSelectedPath((preferred[0] ?? loaded[0])?.path ?? null)
       setReady(true)
     })()
     return () => {
@@ -132,44 +72,10 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     }
   }, [storage])
 
-  const filteredNotes = useMemo(() => {
-    const query = search.trim().toLowerCase()
-    const visible = notes.filter((note) => {
-      if (!matchesSelection(note, selection)) return false
-      if (!query) return true
-      return (
-        note.title.toLowerCase().includes(query) ||
-        note.body.toLowerCase().includes(query) ||
-        note.tags.some((tag) => tag.includes(query))
-      )
-    })
-    return sortNotes(visible, sort)
-  }, [notes, search, selection, sort])
-
   const selectedNote = useMemo(
     () => notes.find((note) => note.path === selectedPath) ?? null,
     [notes, selectedPath],
   )
-
-  const tagTree = useMemo(() => buildTagTree(notes), [notes])
-
-  const headerTitle = useMemo(() => {
-    if (selection.type === 'folder') return FOLDER_TITLES[selection.id]
-    return `#${selection.id}`
-  }, [selection])
-
-  const pickNeighbor = useCallback(
-    (path: string, pool: Note[]) => {
-      const index = pool.findIndex((note) => note.path === path)
-      return pool[index + 1]?.path ?? pool[index - 1]?.path ?? null
-    },
-    [],
-  )
-
-  const setSelection = useCallback((next: Selection) => {
-    setSelectionState(next)
-    setSearch('')
-  }, [])
 
   const selectNote = useCallback((path: string | null) => {
     setSelectedPath(path)
@@ -178,8 +84,6 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   const createNote = useCallback(async () => {
     const note = await createNoteFile(storage, { title: 'Untitled' })
     setNotes((prev) => [note, ...prev])
-    setSelectionState({ type: 'folder', id: 'notes' })
-    setSearch('')
     setSelectedPath(note.path)
     return note
   }, [storage])
@@ -218,16 +122,8 @@ export function NotesProvider({ children }: { children: ReactNode }) {
         tags: current.tags,
       })
       setNotes((prev) => prev.map((note) => (note.path === path ? updated : note)))
-      if (flags.trashed || flags.archived) {
-        setSelectedPath((prev) => {
-          if (prev !== path) return prev
-          const remaining = notesRef.current.filter((note) => note.path !== path)
-          const stillVisible = remaining.filter((note) => matchesSelection(note, selection))
-          return pickNeighbor(path, stillVisible.length ? stillVisible : remaining)
-        })
-      }
     },
-    [pickNeighbor, selection, storage],
+    [storage],
   )
 
   const duplicate = useCallback(
@@ -236,7 +132,6 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       if (!current) return
       const copy = await duplicateNote(storage, current)
       setNotes((prev) => [copy, ...prev])
-      setSelectionState({ type: 'folder', id: 'notes' })
       setSelectedPath(copy.path)
     },
     [storage],
@@ -247,13 +142,9 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       await destroyNote(storage, path)
       const remaining = notesRef.current.filter((note) => note.path !== path)
       setNotes(remaining)
-      setSelectedPath((prev) => {
-        if (prev !== path) return prev
-        const stillVisible = remaining.filter((note) => matchesSelection(note, selection))
-        return stillVisible[0]?.path ?? remaining[0]?.path ?? null
-      })
+      setSelectedPath((prev) => (prev === path ? pickNeighbor(path, remaining) : prev))
     },
-    [selection, storage],
+    [storage],
   )
 
   const unlock = useCallback((path: string) => {
@@ -268,20 +159,11 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     () => ({
       ready,
       notes,
-      filteredNotes,
       selectedPath,
       selectedNote,
-      selection,
-      search,
-      sort,
       unlocked,
       settingsOpen,
-      tagTree,
-      headerTitle,
       storage,
-      setSelection,
-      setSearch,
-      setSort,
       selectNote,
       createNote,
       saveBody,
@@ -294,25 +176,18 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     [
       ready,
       notes,
-      filteredNotes,
       selectedPath,
       selectedNote,
-      selection,
-      search,
-      sort,
       unlocked,
       settingsOpen,
-      tagTree,
-      headerTitle,
       storage,
-      setSelection,
+      selectNote,
       createNote,
       saveBody,
       updateFlags,
       duplicate,
       destroy,
       unlock,
-      selectNote,
     ],
   )
 

@@ -83,7 +83,7 @@ function tomorrow(bugs: number): number {
 `,
   ),
 
-  'homemade-pizza.md': md(
+  'recipes/homemade-pizza.md': md(
     {
       tags: ['food', 'personal'],
       created: '2026-07-08T18:20:00.000Z',
@@ -116,7 +116,7 @@ Finish with basil and a drizzle of oil. #personal
 `,
   ),
 
-  'q3-planning.md': md(
+  'work/q3-planning.md': md(
     {
       tags: ['work', 'work/meetings'],
       created: '2026-07-08T09:00:00.000Z',
@@ -149,7 +149,7 @@ Attendees: Maya, Jon, Priya, Alex
 `,
   ),
 
-  'japan-itinerary.md': md(
+  'travel/japan-itinerary.md': md(
     {
       tags: ['travel'],
       created: '2026-07-06T08:00:00.000Z',
@@ -181,7 +181,7 @@ Buy the IC card on day one. Reserve the Shinkansen seats the night before.
 `,
   ),
 
-  'workout-plan.md': md(
+  'health/workout-plan.md': md(
     {
       tags: ['health', 'personal/health'],
       created: '2026-08-12T07:00:00.000Z',
@@ -206,7 +206,7 @@ Sleep is the program. Training is the commentary.
 `,
   ),
 
-  'atomic-habits.md': md(
+  'books/atomic-habits.md': md(
     {
       tags: ['books', 'personal'],
       created: '2026-06-02T20:00:00.000Z',
@@ -228,7 +228,7 @@ Environment design beats motivation. Identity is the real loop: *I am the kind o
 `,
   ),
 
-  'family-reunion.md': md(
+  'personal/family-reunion.md': md(
     {
       tags: ['personal', 'personal/family'],
       created: '2026-05-18T14:00:00.000Z',
@@ -248,7 +248,7 @@ If it rains: museum in town, then the diner with the too-sweet pie.
 `,
   ),
 
-  'weekend-in-the-mountains.md': md(
+  'travel/weekend-in-the-mountains.md': md(
     {
       tags: ['travel', 'personal'],
       created: '2026-08-01T12:00:00.000Z',
@@ -267,7 +267,7 @@ Leave Friday after lunch. No itinerary beyond trail shoes and a paperback. #trav
 `,
   ),
 
-  'project-ideas.md': md(
+  'ideas/project-ideas.md': md(
     {
       tags: ['code', 'ideas'],
       created: '2026-08-10T22:00:00.000Z',
@@ -287,7 +287,7 @@ The trick is not capturing ideas. It is starting the one that keeps tapping you 
 `,
   ),
 
-  'science-field-notes.md': md(
+  'science/science-field-notes.md': md(
     {
       tags: ['science'],
       created: '2026-04-11T10:00:00.000Z',
@@ -306,7 +306,7 @@ Sketch later. Do not rely on memory for color.
 `,
   ),
 
-  'blog-draft.md': md(
+  'personal/blog-draft.md': md(
     {
       tags: ['personal/blog-post', 'code'],
       created: '2026-08-05T19:00:00.000Z',
@@ -323,7 +323,7 @@ If your notes require a company to stay in business, they are not notes. They ar
 `,
   ),
 
-  'private-journal.md': md(
+  'personal/private-journal.md': md(
     {
       tags: ['journal', 'personal'],
       locked: true,
@@ -339,7 +339,7 @@ Today was ordinary in the way that later becomes the part you miss.
 `,
   ),
 
-  'old-roadmap.md': md(
+  'work/old-roadmap.md': md(
     {
       tags: ['work'],
       archived: true,
@@ -385,13 +385,14 @@ export async function seedIfEmpty(storage: FileStorageAdapter): Promise<void> {
     return
   }
 
-  const workout = SEED['workout-plan.md'].replace(
+  const workoutKey = 'health/workout-plan.md'
+  const workout = SEED[workoutKey].replace(
     /modified: .*/u,
     `modified: ${new Date().toISOString()}`,
   )
 
   for (const [name, raw] of Object.entries(SEED)) {
-    const content = name === 'workout-plan.md' ? workout : raw
+    const content = name === workoutKey ? workout : raw
     await storage.writeFile(`${NOTES_DIR}/${name}`, content)
   }
 }

@@ -28,14 +28,6 @@ export type NoteMeta = {
   modified: string
 }
 
-export type SmartFolder = 'notes' | 'untagged' | 'todo' | 'today' | 'locked' | 'archive' | 'trash'
-
-export type SortMode = 'modified' | 'created' | 'title'
-
-export type Selection =
-  | { type: 'folder'; id: SmartFolder }
-  | { type: 'tag'; id: string }
-
 export type TagNode = {
   name: string
   path: string

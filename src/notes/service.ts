@@ -13,18 +13,26 @@ async function uniquePath(storage: FileStorageAdapter, title: string): Promise<s
   return candidate
 }
 
-export async function listNotes(storage: FileStorageAdapter): Promise<Note[]> {
-  if (!(await storage.exists(NOTES_DIR))) {
-    await storage.mkdir(NOTES_DIR)
-  }
-  const entries = await storage.readdir(NOTES_DIR)
+async function collectNotes(storage: FileStorageAdapter, dir: string): Promise<Note[]> {
+  const entries = await storage.readdir(dir)
   const notes: Note[] = []
   for (const entry of entries) {
-    if (entry.kind !== 'file' || !entry.name.endsWith('.md')) continue
+    if (entry.kind === 'directory') {
+      notes.push(...(await collectNotes(storage, entry.path)))
+      continue
+    }
+    if (!entry.name.endsWith('.md')) continue
     const raw = await storage.readFile(entry.path)
     notes.push(parseNote(entry.path, raw, { ctime: entry.ctime, mtime: entry.mtime }))
   }
   return notes
+}
+
+export async function listNotes(storage: FileStorageAdapter): Promise<Note[]> {
+  if (!(await storage.exists(NOTES_DIR))) {
+    await storage.mkdir(NOTES_DIR)
+  }
+  return collectNotes(storage, NOTES_DIR)
 }
 
 export async function readNote(storage: FileStorageAdapter, path: string): Promise<Note> {

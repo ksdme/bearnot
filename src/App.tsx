@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { EditorPane } from './components/EditorPane'
-import { NoteList } from './components/NoteList'
 import { SettingsModal } from './components/SettingsModal'
 import { Sidebar } from './components/Sidebar'
 import { useNotes } from './state/NotesProvider'
@@ -31,7 +30,6 @@ export default function App() {
   return (
     <div className="app-shell">
       <Sidebar />
-      <NoteList />
       <EditorPane />
       <SettingsModal />
     </div>
