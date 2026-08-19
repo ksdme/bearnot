@@ -234,7 +234,16 @@
     margin: 0 0 14px;
   }
 
+  .bear-editor ul:not([data-type='taskList']) {
+    list-style-type: disc;
+  }
+
+  .bear-editor ol {
+    list-style-type: decimal;
+  }
+
   .bear-editor li {
+    display: list-item;
     margin: 4px 0;
   }
 
