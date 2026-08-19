@@ -3,12 +3,12 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table'
-import TaskItem from '@tiptap/extension-task-item'
-import TaskList from '@tiptap/extension-task-list'
 import Underline from '@tiptap/extension-underline'
 import { Markdown } from '@tiptap/markdown'
 import StarterKit from '@tiptap/starter-kit'
 import { HashtagHighlight } from './hashtag'
+import { EditorTaskItem } from './task-item'
+import { EditorTaskList } from './task-list'
 
 export const editorExtensions = [
   StarterKit.configure({
@@ -28,8 +28,8 @@ export const editorExtensions = [
     allowBase64: true,
     HTMLAttributes: { class: 'note-image' },
   }),
-  TaskList,
-  TaskItem.configure({ nested: true }),
+  EditorTaskList,
+  EditorTaskItem.configure({ nested: true }),
   Table.configure({ resizable: false }),
   TableRow,
   TableHeader,

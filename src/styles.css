@@ -234,7 +234,16 @@
     margin: 0 0 14px;
   }
 
+  .bear-editor ul:not([data-type='taskList']) {
+    list-style-type: disc;
+  }
+
+  .bear-editor ol {
+    list-style-type: decimal;
+  }
+
   .bear-editor li {
+    display: list-item;
     margin: 4px 0;
   }
 
@@ -251,17 +260,24 @@
 
   .bear-editor ul[data-type='taskList'] li > label {
     margin-top: 6px;
+    flex-shrink: 0;
+    display: grid;
+    cursor: pointer;
   }
 
   .bear-editor ul[data-type='taskList'] input[type='checkbox'] {
     appearance: none;
+    -webkit-appearance: none;
     width: 15px;
     height: 15px;
-    border: 1.5px solid var(--color-checkbox);
+    flex-shrink: 0;
+    border-width: 1.5px;
+    border-style: solid;
+    border-color: var(--color-checkbox);
     border-radius: 4px;
     display: grid;
     place-items: center;
-    background: var(--color-panel);
+    background-color: var(--color-panel);
   }
 
   .bear-editor ul[data-type='taskList'] input[type='checkbox']:checked {
