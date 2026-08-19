@@ -13,7 +13,8 @@
   --list-hover: #f6f6f6;
   --list-selected: #f1f1f1;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  --font: "Nunito Sans", "Avenir Next", "Segoe UI", sans-serif;
+  --font: "Ubuntu", sans-serif;
+  --font-mono: "Ubuntu Mono", ui-monospace, monospace;
   --sidebar-w: 220px;
   --list-w: 300px;
 }
@@ -483,7 +484,7 @@ button {
 }
 
 .bear-editor code {
-  font-family: "SF Mono", ui-monospace, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.86em;
   background: #f3f3f3;
   padding: 0.12em 0.38em;
@@ -849,7 +850,7 @@ button {
 }
 
 .file-list code {
-  font-family: "SF Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: #444;
 }
