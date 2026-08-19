@@ -52,11 +52,14 @@
   body,
   #root {
     height: 100%;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   body {
     background: var(--color-chrome-deep);
     color: var(--color-fg);
+    overscroll-behavior: none;
   }
 
   ::selection {
@@ -66,10 +69,16 @@
 
 @utility icon-btn {
   @apply inline-grid size-8 place-items-center rounded-lg border-0 bg-transparent p-0 text-inherit;
+  touch-action: manipulation;
 
   &:hover,
   &.is-active {
     background: rgb(0 0 0 / 0.06);
+  }
+
+  @media (pointer: coarse) {
+    width: 2.5rem;
+    height: 2.5rem;
   }
 }
 
@@ -311,6 +320,18 @@
     .bear-editor,
     .tiptap {
       padding: 12px 24px 48px;
+    }
+  }
+
+  @media (width < 48rem) {
+    .bear-editor,
+    .tiptap {
+      padding: 8px 20px calc(6.5rem + env(safe-area-inset-bottom));
+      min-height: calc(100dvh - 8rem);
+    }
+
+    .bear-editor h1 {
+      font-size: 28px;
     }
   }
 }
