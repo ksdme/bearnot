@@ -73,7 +73,6 @@ export function EditorPane() {
     destroy,
     unlocked,
     unlock,
-    selection,
   } = useNotes()
 
   const [menu, setMenu] = useState<'none' | 'format' | 'info' | 'more' | 'heading' | 'insert'>('none')
@@ -181,7 +180,7 @@ export function EditorPane() {
   }
 
   const stats = wordStats(selectedNote.body)
-  const inTrash = selectedNote.trashed || (selection.type === 'folder' && selection.id === 'trash')
+  const inTrash = selectedNote.trashed
 
   return (
     <section className="editor-pane">

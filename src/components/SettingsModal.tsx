@@ -1,3 +1,4 @@
+import { noteTreePath } from '../notes/paths'
 import { useNotes } from '../state/NotesProvider'
 import { Dialog } from './Popover'
 
@@ -5,7 +6,7 @@ export function SettingsModal() {
   const { settingsOpen, setSettingsOpen, notes, storage } = useNotes()
   if (!settingsOpen) return null
 
-  const files = [...notes].sort((a, b) => a.filename.localeCompare(b.filename))
+  const files = [...notes].sort((a, b) => noteTreePath(a.path).localeCompare(noteTreePath(b.path)))
 
   return (
     <Dialog title="Settings" onClose={() => setSettingsOpen(false)}>
@@ -31,7 +32,7 @@ export function SettingsModal() {
         <ul className="file-list">
           {files.map((note) => (
             <li key={note.path}>
-              <code>{note.filename}</code>
+              <code>{noteTreePath(note.path)}</code>
               <span>{note.title}</span>
             </li>
           ))}
