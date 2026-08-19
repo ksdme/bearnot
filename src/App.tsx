@@ -21,14 +21,14 @@ export default function App() {
 
   if (!ready) {
     return (
-      <div className="boot">
+      <div className="grid h-full place-items-center bg-surface text-[15px] text-fg-muted">
         <span>Opening notes…</span>
       </div>
     )
   }
 
   return (
-    <div className="app-shell">
+    <div className="grid h-full min-h-dvh grid-cols-[var(--spacing-sidebar)_minmax(0,1fr)] gap-2.5 overflow-hidden bg-chrome p-2.5 max-[900px]:grid-cols-[minmax(12.5rem,15rem)_minmax(0,1fr)] max-[900px]:gap-2 max-[900px]:p-2">
       <Sidebar />
       <EditorPane />
       <SettingsModal />

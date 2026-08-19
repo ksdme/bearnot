@@ -45,7 +45,7 @@ function IconButton({
   return (
     <button
       type="button"
-      className={cx('icon-btn', active && 'is-active')}
+      className={cx('icon-btn text-fg-dim', active && 'is-active')}
       aria-label={label}
       title={label}
       onClick={onClick}
@@ -173,8 +173,10 @@ export function EditorPane() {
 
   if (!selectedNote) {
     return (
-      <section className="editor-pane">
-        <div className="editor-empty">Select a note, or write a new one.</div>
+      <section className="relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl bg-panel">
+        <div className="grid h-full place-items-center p-12 text-center text-fg-muted">
+          Select a note, or write a new one.
+        </div>
       </section>
     )
   }
@@ -183,9 +185,9 @@ export function EditorPane() {
   const inTrash = selectedNote.trashed
 
   return (
-    <section className="editor-pane">
-      <header className="editor-top">
-        <div className="editor-top-left">
+    <section className="relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl bg-panel">
+      <header className="flex h-14 items-center justify-between px-4">
+        <div className="flex items-center gap-0.5 text-fg-dim">
           {editor && (
             <>
               <IconButton label="Undo" onClick={() => editor.chain().focus().undo().run()}>
@@ -197,17 +199,17 @@ export function EditorPane() {
             </>
           )}
         </div>
-        <div className="editor-top-right">
-          <div className="menu-anchor">
+        <div className="flex items-center gap-0.5 text-fg-dim">
+          <div className="relative">
             <IconButton
               label="Text style"
               active={menu === 'format'}
               onClick={() => setMenu((current) => (current === 'format' ? 'none' : 'format'))}
             >
-              <span className="biu-label">B I U</span>
+              <span className="text-[10px] font-extrabold tracking-wide">B I U</span>
             </IconButton>
             {menu === 'format' && editor && (
-              <Popover onClose={closeMenus} className="format-popover">
+              <Popover onClose={closeMenus}>
                 <button
                   type="button"
                   className={cx('menu-item', editor.isActive('bold') && 'is-active')}
@@ -240,7 +242,7 @@ export function EditorPane() {
             )}
           </div>
 
-          <div className="menu-anchor">
+          <div className="relative">
             <IconButton
               label="Note info"
               active={menu === 'info'}
@@ -249,29 +251,29 @@ export function EditorPane() {
               <Info size={16} />
             </IconButton>
             {menu === 'info' && (
-              <Popover onClose={closeMenus} className="info-popover">
-                <div className="info-row">
+              <Popover onClose={closeMenus} className="w-[260px] p-3">
+                <div className="flex justify-between gap-3 py-1.5 text-[13px] text-fg-muted">
                   <span>Created</span>
-                  <strong>{formatAbsolute(selectedNote.created)}</strong>
+                  <strong className="font-bold text-fg">{formatAbsolute(selectedNote.created)}</strong>
                 </div>
-                <div className="info-row">
+                <div className="flex justify-between gap-3 py-1.5 text-[13px] text-fg-muted">
                   <span>Modified</span>
-                  <strong>{formatAbsolute(selectedNote.modified)}</strong>
+                  <strong className="font-bold text-fg">{formatAbsolute(selectedNote.modified)}</strong>
                 </div>
-                <div className="info-row">
+                <div className="flex justify-between gap-3 py-1.5 text-[13px] text-fg-muted">
                   <span>Words</span>
-                  <strong>{stats.words}</strong>
+                  <strong className="font-bold text-fg">{stats.words}</strong>
                 </div>
-                <div className="info-row">
+                <div className="flex justify-between gap-3 py-1.5 text-[13px] text-fg-muted">
                   <span>Characters</span>
-                  <strong>{stats.chars}</strong>
+                  <strong className="font-bold text-fg">{stats.chars}</strong>
                 </div>
-                <div className="info-row">
+                <div className="flex justify-between gap-3 py-1.5 text-[13px] text-fg-muted">
                   <span>Paragraphs</span>
-                  <strong>{stats.paragraphs}</strong>
+                  <strong className="font-bold text-fg">{stats.paragraphs}</strong>
                 </div>
                 {selectedNote.tags.length > 0 && (
-                  <div className="info-tags">
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {selectedNote.tags.map((tag) => (
                       <span key={tag} className="hashtag">
                         #{tag}
@@ -279,12 +281,12 @@ export function EditorPane() {
                     ))}
                   </div>
                 )}
-                <div className="info-file">{selectedNote.filename}</div>
+                <div className="mt-2.5 text-xs text-fg-muted">{selectedNote.filename}</div>
               </Popover>
             )}
           </div>
 
-          <div className="menu-anchor">
+          <div className="relative">
             <IconButton
               label="More"
               active={menu === 'more'}
@@ -293,7 +295,7 @@ export function EditorPane() {
               <MoreHorizontal size={16} />
             </IconButton>
             {menu === 'more' && (
-              <Popover onClose={closeMenus} className="more-popover">
+              <Popover onClose={closeMenus}>
                 <button
                   type="button"
                   className="menu-item"
@@ -327,7 +329,7 @@ export function EditorPane() {
                 <button type="button" className="menu-item" onClick={() => run(() => void duplicate(selectedNote.path))}>
                   <Copy size={14} /> Duplicate
                 </button>
-                <div className="menu-sep" />
+                <div className="mx-1.5 my-1 h-px bg-border-subtle" />
                 {inTrash ? (
                   <>
                     <button
@@ -360,12 +362,14 @@ export function EditorPane() {
         </div>
       </header>
 
-      <div className="editor-scroll">
+      <div className="flex-1 overflow-auto px-0 pt-2 pb-24 [&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-panel [&::-webkit-scrollbar-thumb]:bg-border">
         {isLocked ? (
-          <div className="lock-screen">
+          <div className="grid h-full place-items-center content-center justify-items-center gap-2.5 p-12 text-center text-fg-subtle">
             <Lock size={36} strokeWidth={1.4} />
-            <h2>This note is locked</h2>
-            <p>Password protection will arrive with accounts. Unlock it for this session to keep writing.</p>
+            <h2 className="mt-2 mb-0 text-[22px] text-fg">This note is locked</h2>
+            <p className="mb-2 max-w-[360px] leading-normal">
+              Password protection will arrive with accounts. Unlock it for this session to keep writing.
+            </p>
             <button type="button" className="primary-btn" onClick={() => unlock(selectedNote.path)}>
               Unlock
             </button>
@@ -376,8 +380,8 @@ export function EditorPane() {
       </div>
 
       {!isLocked && editor && (
-        <div className="floating-toolbar">
-          <div className="menu-anchor">
+        <div className="absolute bottom-[22px] left-1/2 z-10 flex -translate-x-1/2 items-center gap-0.5 rounded-[14px] bg-toolbar px-2 py-1.5 text-fg-menu shadow-float">
+          <div className="relative">
             <IconButton
               label="Headings"
               active={menu === 'heading' || editor.isActive('heading')}
@@ -386,7 +390,7 @@ export function EditorPane() {
               <Heading size={16} />
             </IconButton>
             {menu === 'heading' && (
-              <Popover onClose={closeMenus} className="toolbar-popover">
+              <Popover onClose={closeMenus} className="top-auto right-auto bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2">
                 <button
                   type="button"
                   className={cx('menu-item', editor.isActive('heading', { level: 1 }) && 'is-active')}
@@ -432,7 +436,7 @@ export function EditorPane() {
           >
             <List size={16} />
           </IconButton>
-          <span className="toolbar-sep" />
+          <span className="mx-1 h-4 w-px bg-border" />
           <IconButton
             label="Bold"
             active={editor.isActive('bold')}
@@ -454,7 +458,7 @@ export function EditorPane() {
           >
             <Highlighter size={16} />
           </IconButton>
-          <span className="toolbar-sep" />
+          <span className="mx-1 h-4 w-px bg-border" />
           <IconButton
             label="Link"
             active={editor.isActive('link')}
@@ -486,7 +490,7 @@ export function EditorPane() {
           >
             <ImageIcon size={16} />
           </IconButton>
-          <div className="menu-anchor">
+          <div className="relative">
             <IconButton
               label="More formatting"
               active={menu === 'insert'}
@@ -495,7 +499,7 @@ export function EditorPane() {
               <MoreHorizontal size={16} />
             </IconButton>
             {menu === 'insert' && (
-              <Popover onClose={closeMenus} className="toolbar-popover">
+              <Popover onClose={closeMenus} className="top-auto right-auto bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2">
                 <button
                   type="button"
                   className={cx('menu-item', editor.isActive('blockquote') && 'is-active')}
@@ -525,15 +529,20 @@ export function EditorPane() {
 
       {prompt !== 'none' && (
         <Dialog title={prompt === 'link' ? 'Add link' : 'Add image'} onClose={() => setPrompt('none')}>
-          <form onSubmit={submitPrompt} className="prompt-form">
+          <form onSubmit={submitPrompt}>
             <input
               autoFocus
               value={promptValue}
               onChange={(event) => setPromptValue(event.target.value)}
               placeholder={prompt === 'link' ? 'https://' : 'Image URL'}
+              className="w-full rounded-[10px] border border-border-subtle px-3 py-2.5 text-sm outline-none focus:border-fg-placeholder"
             />
-            <div className="dialog-actions">
-              <button type="button" onClick={() => setPrompt('none')}>
+            <div className="mt-3.5 flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-[10px] border-0 bg-surface-muted px-3.5 py-2 font-bold"
+                onClick={() => setPrompt('none')}
+              >
                 Cancel
               </button>
               <button type="submit" className="primary-btn">
