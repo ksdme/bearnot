@@ -34,7 +34,14 @@ export function Popover({
 }) {
   const ref = useDismiss(onClose)
   return (
-    <div ref={ref} className={cx('popover', className)} role="menu">
+    <div
+      ref={ref}
+      className={cx(
+        'absolute top-[calc(100%+6px)] right-0 z-20 min-w-[188px] rounded-xl border border-border-subtle bg-panel p-1.5 shadow-float',
+        className,
+      )}
+      role="menu"
+    >
       {children}
     </div>
   )
@@ -50,15 +57,21 @@ export function Dialog({
   onClose: () => void
 }) {
   return (
-    <div className="modal-backdrop" onClick={onClose} role="presentation">
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/35"
+      onClick={onClose}
+      role="presentation"
+    >
       <div
-        className="modal"
+        className="w-[min(32.5rem,calc(100vw-2rem))] rounded-2xl bg-panel px-6 pt-[22px] pb-5 shadow-float"
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id="dialog-title">{title}</h2>
+        <h2 id="dialog-title" className="mb-3 text-xl tracking-tight">
+          {title}
+        </h2>
         {children}
       </div>
     </div>

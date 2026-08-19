@@ -1,38 +1,30 @@
-import { themeToTreeStyles } from '@pierre/trees'
 import { FileTree, useFileTree } from '@pierre/trees/react'
 import { Search, SlidersHorizontal, SquarePen } from 'lucide-react'
 import { useEffect, useMemo, useRef, type CSSProperties } from 'react'
 import { noteTreePath, treePathToNotePath } from '../notes/paths'
 import { useNotes } from '../state/NotesProvider'
 
-const TREE_THEME = themeToTreeStyles({
-  type: 'dark',
-  bg: '#2a2a2a',
-  fg: '#c8c8c8',
-  colors: {
-    'sideBar.background': '#2a2a2a',
-    'sideBar.foreground': '#c8c8c8',
-    'sideBar.border': 'transparent',
-    'sideBarSectionHeader.foreground': '#8d8d8d',
-    'list.activeSelectionBackground': '#3d3d3d',
-    'list.activeSelectionForeground': '#ffffff',
-    'list.hoverBackground': '#333333',
-    'list.focusBackground': '#3d3d3d',
-    'list.focusOutline': '#e24b3e',
-    'input.background': '#1f1f1f',
-    'input.border': '#3d3d3d',
-    'scrollbarSlider.background': '#444444',
-  },
-})
-
 const TREE_STYLE = {
-  ...TREE_THEME,
   height: '100%',
   minHeight: 0,
   border: 'none',
-  '--trees-font-family-override': 'var(--font)',
-  '--trees-accent-override': 'var(--bear-red)',
+  colorScheme: 'dark',
+  backgroundColor: 'var(--color-sidebar)',
+  color: 'var(--color-sidebar-fg)',
+  '--trees-font-family-override': 'var(--font-sans)',
+  '--trees-accent-override': 'var(--color-bear)',
   '--trees-padding-inline-override': '10px',
+  '--trees-theme-sidebar-bg': 'var(--color-sidebar)',
+  '--trees-theme-sidebar-fg': 'var(--color-sidebar-fg)',
+  '--trees-theme-sidebar-header-fg': 'var(--color-sidebar-muted)',
+  '--trees-theme-sidebar-border': 'transparent',
+  '--trees-theme-list-active-selection-fg': 'var(--color-sidebar-selected-fg)',
+  '--trees-theme-list-hover-bg': 'var(--color-sidebar-hover)',
+  '--trees-theme-list-active-selection-bg': 'var(--color-sidebar-selected)',
+  '--trees-theme-focus-ring': 'var(--color-bear)',
+  '--trees-theme-input-bg': 'var(--color-sidebar-input)',
+  '--trees-theme-input-border': 'var(--color-sidebar-border)',
+  '--trees-theme-scrollbar-thumb': 'var(--color-sidebar-scroll)',
 } as CSSProperties
 
 export function Sidebar() {
@@ -100,14 +92,14 @@ export function Sidebar() {
   }, [model])
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-top">
-        <div className="traffic" aria-hidden="true">
-          <span className="tl tl-red" />
-          <span className="tl tl-yellow" />
-          <span className="tl tl-green" />
+    <aside className="flex min-h-0 min-w-0 select-none flex-col overflow-hidden rounded-xl bg-sidebar text-sidebar-fg">
+      <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5">
+        <div className="flex gap-[7px]" aria-hidden="true">
+          <span className="block size-3 rounded-full bg-traffic-red" />
+          <span className="block size-3 rounded-full bg-traffic-yellow" />
+          <span className="block size-3 rounded-full bg-traffic-green" />
         </div>
-        <div className="sidebar-actions">
+        <div className="flex items-center gap-0.5">
           <button
             type="button"
             className="icon-btn icon-btn-ghost"
@@ -138,7 +130,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      <FileTree model={model} className="notes-tree" style={TREE_STYLE} />
+      <FileTree model={model} className="flex min-h-0 w-full flex-1" style={TREE_STYLE} />
     </aside>
   )
 }
